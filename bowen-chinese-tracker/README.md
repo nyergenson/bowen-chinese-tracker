@@ -48,4 +48,4 @@ Suggested sentence patterns:
 - 我看熊猫。 / Wǒ kàn xióngmāo. / I see a panda.
 - 我玩球。 / Wǒ wán qiú. / I play with a ball.
 
-These are lesson-introduced items, not assumed mastered. Assess each skill independently after practicing with Bowen.
+These are lesson-introduced items, not assumed mastered. Assess each skill independently after practicing with Bowen. 
