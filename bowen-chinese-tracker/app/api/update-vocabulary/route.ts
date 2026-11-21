@@ -9,10 +9,6 @@ const allowedFields = [
   'english',
   'word_type',
   'lesson_introduced',
-  'listening_level',
-  'speaking_level',
-  'recall_level',
-  'review_priority',
   'notes',
 ] as const;
 
@@ -76,14 +72,16 @@ export async function GET(req: NextRequest) {
     return reply({ error: 'Invalid JSON' }, 400);
   }
 
-  if (!Array.isArray(words) ||
-      words.length < 1 ||
-      words.length > 30) {
+  if (
+    !Array.isArray(words) ||
+    words.length < 1 ||
+    words.length > 30
+  ) {
     return reply({ error: 'Expected 1 to 30 words' }, 400);
   }
 
   const valid = words.every(
-    (word) =>
+    word =>
       word &&
       typeof word === 'object' &&
       !Array.isArray(word) &&
@@ -91,7 +89,6 @@ export async function GET(req: NextRequest) {
       word.hanzi.trim().length > 0 &&
       word.hanzi.length <= 100 &&
       Object.entries(word).every(([field, value]) => {
-
         if (
           practiceFields.includes(
             field as typeof practiceFields[number]
@@ -180,11 +177,6 @@ export async function GET(req: NextRequest) {
       // Preserve the original lesson introduced.
       delete fields.lesson_introduced;
 
-      // Practice scheduling controls review priority.
-      if (word.practiced || word.needs_extra_practice) {
-        delete fields.review_priority;
-      }
-
       if (Object.keys(fields).length > 0) {
         const { error } = await admin
           .from('vocabulary')
@@ -203,6 +195,19 @@ export async function GET(req: NextRequest) {
       }
 
     } else {
+      // Prevent incomplete vocabulary entries.
+      if (
+        !word.pinyin?.trim() ||
+        !word.english?.trim() ||
+        !word.word_type?.trim() ||
+        !word.lesson_introduced?.trim()
+      ) {
+        return reply({
+          error: 'New words require pinyin, english, word_type, and lesson_introduced',
+          hanzi,
+        }, 400);
+      }
+
       const { data: inserted, error } = await admin
         .from('vocabulary')
         .insert({
@@ -223,7 +228,7 @@ export async function GET(req: NextRequest) {
       action = 'added';
     }
 
-    // Record actual practice using the database function.
+    // Record practice and calculate the review schedule.
     if (word.practiced === true) {
       const { error: practiceError } = await admin.rpc(
         'record_vocabulary_practice',
@@ -244,11 +249,10 @@ export async function GET(req: NextRequest) {
 
     } else if (word.needs_extra_practice === true) {
 
-      // Flag a word without falsely recording practice.
+      // Request extra practice without counting a review.
       const { error: flagError } = await admin
         .from('vocabulary')
         .update({
-          review_priority: 'high',
           review_stage: 0,
           extra_reviews_remaining: 3,
           next_review_at: new Date().toISOString(),
@@ -265,7 +269,7 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Return the current scheduling information.
+    // Return the updated practice information.
     const { data: current, error: currentError } = await admin
       .from('vocabulary')
       .select(`
@@ -273,7 +277,6 @@ export async function GET(req: NextRequest) {
         last_practiced_at,
         next_review_at,
         review_stage,
-        review_priority,
         extra_reviews_remaining
       `)
       .eq('id', vocabularyId)
