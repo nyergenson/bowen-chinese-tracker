@@ -32,7 +32,7 @@ const lessonInstructions = `
 
 ## Student and learning goals
 
-Bowen is a 4-year-old child learning Mandarin Chinese.
+Bowen is a 4-year-old (Born March 2022) child learning Mandarin Chinese.
 
 Focus on listening comprehension, speaking, pronunciation,
 and developing an intuitive understanding of Chinese.
@@ -83,6 +83,9 @@ Use the following priority order:
 5. Occasionally include older vocabulary for continued exposure.
 
 Use review_due and days_overdue to help select words.
+
+Inform the parent if there are more overdue words than can be 
+reviewed in one session
 
 Aim to review approximately 4 to 8 existing words per
 lesson, depending on Bowen's attention and the story.
@@ -257,6 +260,11 @@ to the final review.
 
 Do not prematurely end a lesson unless the parent
 requests it or the lesson is genuinely complete.
+
+IMPORTANT: Always pronounce Chinese words with a 
+standard Mandarin accent, not an American accent. 
+Make sure to pronounce the tones as a native 
+speaker would
 
 ## Practice tracking
 
